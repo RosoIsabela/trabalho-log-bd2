@@ -5,23 +5,9 @@ from db import conectar_db
 from logica_redo import buscar_transacoes_commitadas, buscar_operacoes_por_transacao
 from executa_redo import executa_redo
 
-def recriar_tabela_clientes(conn):
-    with conn.cursor() as cursor:
-        #cursor.execute("DROP TABLE IF EXISTS clientes_em_memoria;")
-        cursor.execute("""
-            create unlogged table if not exists clientes_em_memoria (
-                id serial primary key,
-                nome text,
-                saldo numeric  
-            );               
-        """)
-        conn.commit()
-        print("Tabela 'clientes_em_memoria garantida no banco")
-
 def run_processo_redo(conn):
     print("Iniciando processo de REDO...")
 
-    recriar_tabela_clientes(conn)
     ids_transacoes_commitadas = buscar_transacoes_commitadas(conn)
 
     if not ids_transacoes_commitadas:
@@ -35,10 +21,10 @@ def run_processo_redo(conn):
         if operacoes_da_transacao:
             todas_operacoes_redo.extend(operacoes_da_transacao)
         else:
-            print(f"Nenhuma operação de dados (INSERT/UPDATE) encontrada para a transação {tx_id}")
+            print(f"Nenhuma operação de dados (INSERT/UPDATE/DELETE) encontrada para a transação {tx_id}")
 
     if not todas_operacoes_redo:
-        print("Nenhuma operação de dados (INSERT/UPDATE) encontrada em todas as transações commitadas para aplicar REDO")
+        print("Nenhuma operação de dados (INSERT/UPDATE/DELETE) encontrada em todas as transações commitadas para aplicar REDO")
         return
     
     #Ordena todas as operacoes pelo id_log para manter a ordem correta

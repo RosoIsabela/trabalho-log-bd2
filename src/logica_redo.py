@@ -21,7 +21,7 @@ def buscar_operacoes_por_transacao(conn, id_transacao):
         with conn.cursor() as cursor:
             cursor.execute("""
                 select id_log, operacao, id_cliente, nome, saldo from log
-                where id_transacao = %s and operacao in ('INSERT', 'UPDATE')
+                where id_transacao = %s and operacao in ('INSERT', 'UPDATE', 'DELETE')
                 order by id_log asc; 
             """, (id_transacao,))
             linhas = cursor.fetchall()
